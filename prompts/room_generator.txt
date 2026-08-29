@@ -1,0 +1,15 @@
+Design one 2D game room as compact JSON.
+
+Rules:
+- width/height are provided by the caller.
+- Use only object types: wall, platform, ladder, door, decor, enemy.
+- Do not return a pixel matrix.
+- Prefer rectangles and compact segments.
+- Every room needs at least one 1x3 door.
+- Platforms are 1 cell high.
+- Ladders are exactly 1 cell wide.
+- Enemies are exactly 1x1.
+- Decor sizes may only be 1x1, 1x2, 2x1, 2x2, 3x3, 4x3.
+- Keep the room connected and avoid overlaps.
+- Return only JSON matching the schema.
+
