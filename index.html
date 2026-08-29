@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Pixel RoomGen MVP</title>
+  <style>
+    :root{--ink:#111;--paper:#f7f1e6;--gold:#ffd55d;--blue:#69b9ff;--pink:#ff7d89;--mint:#77e3b7;--shadow:7px 7px 0 #111}*{box-sizing:border-box}body{margin:0;font-family:Inter,Arial,sans-serif;background:linear-gradient(90deg,rgba(0,0,0,.06) 1px,transparent 1px) 0 0/48px 48px,var(--paper);color:var(--ink)}main{max-width:1160px;margin:auto;padding:28px}.hero{display:grid;grid-template-columns:.9fr 1.1fr;gap:28px;align-items:center;min-height:92vh}.badge,.btn{display:inline-block;border:3px solid #111;border-radius:999px;background:var(--mint);padding:10px 14px;font-weight:950;box-shadow:4px 4px 0 #111}.btn{border-radius:12px;background:var(--gold);text-decoration:none;cursor:pointer}h1{font-size:clamp(46px,8vw,96px);line-height:.88;margin:18px 0}p{font-size:19px;line-height:1.45;font-weight:650;color:#3b332d}.stage,.card{border:4px solid #111;border-radius:20px;background:#fff;box-shadow:var(--shadow);padding:18px}.top{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}input,button{border:3px solid #111;border-radius:12px;padding:12px 14px;font-weight:900;background:#fff;box-shadow:4px 4px 0 #111}button{background:var(--gold);cursor:pointer}canvas{width:100%;border:5px solid #111;image-rendering:pixelated;background:#fff}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:28px}.card h3{margin:0 0 8px}.code{font-family:ui-monospace,Consolas,monospace;background:#111;color:#d7ff7c;border-radius:14px;padding:16px;overflow:auto;font-size:13px}.links{display:flex;gap:12px;flex-wrap:wrap;margin-top:18px}@media(max-width:900px){.hero,.grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<main>
+  <section class="hero">
+    <div>
+      <span class="badge">Isolated technical MVP</span>
+      <h1>Pixel-perfect room schema generator.</h1>
+      <p>Deterministic generator for 2D game levels: semantic JSON, PNG preview, geometry validation, collision checks, pathfinding constraints and color whitelist.</p>
+      <div class="links"><a class="btn" href="./output/room_001.png" target="_blank">Open sample PNG</a><a class="btn" href="./output/room_001.json" target="_blank">Open sample JSON</a><a class="btn" href="./output/generation_report.json" target="_blank">Validation report</a></div>
+    </div>
+    <div class="stage">
+      <div class="top"><input id="seed" value="room-demo"><button onclick="gen()">Generate preview</button><button onclick="downloadJson()">JSON</button></div>
+      <canvas id="c" width="960" height="540"></canvas>
+      <pre class="code" id="out"></pre>
+    </div>
+  </section>
+  <section class="grid">
+    <article class="card"><h3>Strict output</h3><p>Every generated room has a compact JSON schema with object coordinates and gameplay elements.</p></article>
+    <article class="card"><h3>Validator-first</h3><p>Rooms are checked for bounds, collisions, connectivity and allowed pixel colors before delivery.</p></article>
+    <article class="card"><h3>Zero-token default</h3><p>The MVP runs deterministically without OpenAI calls; AI support is isolated and optional.</p></article>
+  </section>
+</main>
+<script>
+const c=document.getElementById('c'),x=c.getContext('2d');let data={};function R(s){let h=2166136261;for(let i=0;i<s.length;i++)h=(h^s.charCodeAt(i))*16777619>>>0;return()=>((h=(h*1664525+1013904223)>>>0)/4294967296)}function rect(a,b,w,h,col){x.fillStyle=col;x.fillRect(a,b,w,h)}function line(a,b,c,d,w,col){x.strokeStyle=col;x.lineWidth=w;x.beginPath();x.moveTo(a,b);x.lineTo(c,d);x.stroke()}function gen(){let seed=document.getElementById('seed').value||'demo';let r=R(seed);x.clearRect(0,0,960,540);rect(0,0,960,540,'#fff');data={seed,room:{width:960,height:540},objects:[]};function add(type,o){data.objects.push({type,...o})}rect(70,70,580,30,'#111');rect(70,352,790,30,'#111');rect(70,92,28,210,'#111');rect(622,92,28,210,'#111');add('bounds',{ceiling:true,floor:true,walls:2});for(let i=0;i<5;i++){let y=125+i*37;line(130,y,305,y,18,'#111');add('platform',{x:130,y,w:175})}for(let i=0;i<5;i++){let px=380+i*92,py=150+(i%2)*58;line(px,py,px+72,py,8,i%2?'#ffd55d':'#69b9ff');add('thin_platform',{x:px,y:py,w:72})}for(let lx of [118,750]){line(lx,88,lx,352,5,'#89531d');line(lx+40,88,lx+40,352,5,'#89531d');for(let y=105;y<340;y+=25)line(lx,y,lx+40,y,4,'#89531d');add('ladder',{x:lx,y:88,h:264})}rect(540,298,46,54,'#ffd55d');rect(552,312,8,8,'#111');add('door',{x:540,y:298,w:46,h:54});for(let i=0;i<16;i++){let sx=145+r()*650,sy=318+r()*23;rect(sx,sy,12,10,'#ff6b6b');add('decor_spike',{x:sx|0,y:sy|0})}for(let i=0;i<8;i++){let bx=245+r()*540,by=110+r()*205;rect(bx,by,20,20,'#ddd');rect(bx+5,by+5,10,10,'#111');add('block',{x:bx|0,y:by|0})}out.textContent=JSON.stringify(data,null,2)}function downloadJson(){let a=document.createElement('a');a.href='data:application/json;charset=utf-8,'+encodeURIComponent(JSON.stringify(data,null,2));a.download='room.json';a.click()}gen();
+</script>
+</body>
+</html>
